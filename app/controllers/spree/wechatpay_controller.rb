@@ -3,12 +3,27 @@ module Spree
     #ssl_allowed
     skip_before_filter :verify_authenticity_token
 
+    def wechat_pay_js_params
+      @params = {
+        body: '支付一分钱',
+        out_trade_no: "test_order_#{Time.now.to_i.to_s}",
+        total_fee: 1,
+        spbill_create_ip: request.remote_ip,
+        notify_url: 'http://origin.geizan.com.cn/blogs/show/2',
+        trade_type: 'JSAPI', # could be "JSAPI", "NATIVE" or "APP",
+        openid: 'please replace this openid' # required when trade_type is `JSAPI`
+      }
+
+      @params = WxPay::Service.invoke_unifiedorder @params
+      @params = WxPay::Service::generate_jsapi_pay_req @params['prepay_id']
+      render json: @params
+    end
+
     def pay_options(order)
       payment_method = Spree::PaymentMethod.find(params[:payment_method_id])
       host = payment_method.preferences[:returnHost].blank? ? request.url.sub(request.fullpath, '') : payment_method.preferences[:returnHost]
 
       package_options = {
-          bank_type: "WX",
           body: "#{order.line_items[0].product.name.slice(0,30)}等#{order.line_items.count}件",
           partner: payment_method.preferences[:partnerId],
           out_trade_no: order.number,
