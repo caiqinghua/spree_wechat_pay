@@ -6,8 +6,8 @@ module Spree
     def js_api_params
       @params = {
         body: 'Order Payment by Wechat Pay',
-        out_trade_no: "#current_order.id_#{Time.now.to_i.to_s}",
-        total_fee: current_order.payment_total,
+        out_trade_no: "#{current_order.number}_#{Time.now.to_i.to_s}",
+        total_fee: (current_order.total * 100).to_i,
         spbill_create_ip: request.remote_ip,
         notify_url: '/wechatpay/notify',
         trade_type: 'JSAPI', # could be "JSAPI", "NATIVE" or "APP",
