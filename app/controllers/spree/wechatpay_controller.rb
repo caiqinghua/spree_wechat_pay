@@ -4,10 +4,11 @@ module Spree
     skip_before_filter :verify_authenticity_token
 
     def js_api_params
+      order = current_order
       @params = {
-        body: 'Order Payment by Wechat Pay',
-        out_trade_no: "#{current_order.number}_#{Time.now.to_i.to_s}",
-        total_fee: (current_order.total * 100).to_i,
+        body: "#{order.line_items[0].product.name.slice(0,30)}等#{order.line_items.count}件",
+        out_trade_no: "#{order.number}_#{Time.now.to_i.to_s}",
+        total_fee: (order.total * 100).to_i,
         spbill_create_ip: request.remote_ip,
         notify_url: '/wechatpay/notify',
         trade_type: 'JSAPI', # could be "JSAPI", "NATIVE" or "APP",
@@ -17,6 +18,21 @@ module Spree
       @params = WxPay::Service.invoke_unifiedorder @params
       @params = WxPay::Service::generate_jsapi_pay_req @params['prepay_id']
       render json: @params
+    end
+
+    def notify
+      result = Hash.from_xml(request.body.read)["xml"]
+
+      if WxPay::Sign.verify?(result)
+
+        # find your order and process the post-paid logic.
+        order = Spree::Order.find_by(number: result.out_trade_no)
+        order.payments.last.capture!
+
+        render :xml => {return_code: "SUCCESS"}.to_xml(root: 'xml', dasherize: false)
+      else
+        render :xml => {return_code: "SUCCESS", return_msg: "签名失败"}.to_xml(root: 'xml', dasherize: false)
+      end
     end
 
     def pay_options(order)
@@ -59,7 +75,7 @@ module Spree
       render json: pay_options(order)
     end
 
-    def notify
+    def _notify
       order = Spree::Order.find(params[:id]) || raise(ActiveRecord::RecordNotFound)
       payment_notify_data = params.slice(:sign_type, :service_version, :input_charset, :sign, :sign_key_index, :trade_mode, :trade_state, :pay_info, :partner, :bank_type, :bank_billno, :total_fee, :fee_type, :notify_id, :transaction_id, :out_trade_no, :attach, :time_end, :transport_fee, :product_fee, :discount, :buyer_alias, :xml)
 

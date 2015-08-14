@@ -26,6 +26,10 @@ module Spree
       true
     end
 
+    def source_required?
+      false
+    end
+
     def method_type
       'wechatpay'
     end
