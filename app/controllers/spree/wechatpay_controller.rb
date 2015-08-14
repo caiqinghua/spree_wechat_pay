@@ -23,6 +23,8 @@ module Spree
     def notify
       result = Hash.from_xml(request.body.read)["xml"]
 
+      logger.info "[wechatpay]#{JSON.stringify(result)}"
+
       if WxPay::Sign.verify?(result)
 
         # find your order and process the post-paid logic.
