@@ -11,7 +11,7 @@ module Spree
         out_trade_no: "#{order.number}_#{Time.now.to_i.to_s}",
         total_fee: (order.total * 100).to_i,
         spbill_create_ip: request.remote_ip,
-        notify_url: '/wechatpay/notify',
+        notify_url: wechatpay_notify_url,
         trade_type: 'JSAPI', # could be "JSAPI", "NATIVE" or "APP",
         openid: current_user.uid # required when trade_type is `JSAPI`
       }
@@ -37,6 +37,7 @@ module Spree
           next if wechat_payment.currency == result["fee_type"] && wechat_payment.money.money.cents == result["cash_fee"]
           wechat_payment.capture!
           wechat_payment.response_code = result["transaction_id"]
+          wechat_payment.save
           render xml: {return_code: "SUCCESS"}.to_xml(root: 'xml', dasherize: false)
           return
         end
