@@ -12,9 +12,6 @@ module Spree
       true
     end
 
-    def provider
-    end
-
     def purchase(amount, express_checkout, gateway_options={})
       Class.new do
         def success?; true; end
@@ -24,6 +21,10 @@ module Spree
 
     def auto_capture?
       true
+    end
+
+    def capture(amount, response_code, gateway_options)
+      ActiveMerchant::Billing::Response.new(true, 'WechatPay:#{response_code}', {}, test: false)
     end
 
     def source_required?

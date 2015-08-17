@@ -3,24 +3,15 @@
     //调用微信JS api 支付
     function jsApiCall()
     {
-                $.ajax({
+      $.ajax({
             url: '/wechatpay/js_api_params',
             dataType: 'JSON',
             type: 'GET',
             success: function(response){
-        alert(response.appId);
                 if(response && response.appId){
-                    alert('response sucess');
-        alert(response.appId);
-        alert(response.timeStamp);
-        alert(response.nonceStr);
-        alert(response.package);
-        alert(response.signType);
-        alert(response.paySign);
                     WeixinJSBridge.invoke('getBrandWCPayRequest', response, function(res){
-            alert(res.err_msg);
                         if(res.err_msg == "get_brand_wcpay_request:ok" ) {
-            alert('pay sucess');
+                            $('#checkout_form_payment').trigger("submit");
                             //window.location.href = '/orders/'+ response.orderNumber;
                         }
                         //使用以上方式判断前端返回,微信团队郑重提示：res.err_msg将在用户支付成功后返回ok，但并不保证它绝对可靠。
@@ -29,8 +20,6 @@
                 }
             },
             error: function(err){
-                alert('ajax error');
-                alert(JSON.stringify(err));
                 console.log(err);
             }
         });
@@ -38,19 +27,14 @@
 
     function callpay()
     {
-        alert('callpay');
         if (typeof WeixinJSBridge == "undefined"){
-            alert('undefined');
             if( document.addEventListener ){
-            alert('addEventListener true');
                 document.addEventListener('WeixinJSBridgeReady', jsApiCall, false);
             }else if (document.attachEvent){
-            alert('attachEvent');
                 document.attachEvent('WeixinJSBridgeReady', jsApiCall); 
                 document.attachEvent('onWeixinJSBridgeReady', jsApiCall);
             }
         }else{
-            alert('jsApiCall');
             jsApiCall();
         }
     }
