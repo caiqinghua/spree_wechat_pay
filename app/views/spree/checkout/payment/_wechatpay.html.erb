@@ -31,7 +31,7 @@
             if( document.addEventListener ){
                 document.addEventListener('WeixinJSBridgeReady', jsApiCall, false);
             }else if (document.attachEvent){
-                document.attachEvent('WeixinJSBridgeReady', jsApiCall); 
+                document.attachEvent('WeixinJSBridgeReady', jsApiCall);
                 document.attachEvent('onWeixinJSBridgeReady', jsApiCall);
             }
         }else{
@@ -39,8 +39,3 @@
         }
     }
 </script>
-
-    </br>
-    <div align="center">
-        <button id='wechat_pay_button' style="width:210px; height:30px; background-color:#FE6714; border:0px #FE6714 solid; cursor: pointer;  color:white;  font-size:16px;" type="button" onclick="callpay()" >WechatPay</button>
-    </div>
